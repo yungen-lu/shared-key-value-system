@@ -5,3 +5,7 @@ type List struct {
 	PageCount  uint16
 	NextPageID uint64
 }
+
+type ListRepo interface {
+	GetHead(id uint64) (List, error)
+}

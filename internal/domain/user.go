@@ -9,3 +9,7 @@ type User struct {
 	UpdatedAt    time.Time
 	PersonalList List
 }
+
+type UserRepo interface {
+	GetByID(id uint64) (User, error)
+}
