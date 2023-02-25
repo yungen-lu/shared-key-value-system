@@ -1,7 +1,11 @@
 package v1
 
-import "net/http"
+import (
+	"net/http"
 
-func PageHandler(rw http.ResponseWriter, r *http.Request) {
-	rw.Write([]byte("Hello World!"))
+	"github.com/gin-gonic/gin"
+)
+
+func PageHandler(c *gin.Context) {
+	c.String(http.StatusOK, "Hello World!")
 }

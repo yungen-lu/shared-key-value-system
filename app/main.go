@@ -5,14 +5,16 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/gin-gonic/gin"
 	v1 "github.com/yungen-lu/shared-key-value-list-system/internal/controller/http/v1"
 	"github.com/yungen-lu/shared-key-value-list-system/pkg/httpserver"
 )
 
 func main() {
 
-	v1.NewRouter()
-	httpServer := httpserver.New(v1.NewRouter(), httpserver.Port("80"))
+	handler := gin.New()
+	v1.NewRouter(handler)
+	httpServer := httpserver.New(handler, httpserver.Port("80"))
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
@@ -21,5 +23,9 @@ func main() {
 		_ = sig
 	case err := <-httpServer.Notify():
 		_ = err
+	}
+	err := httpServer.Shutdown()
+	if err != nil {
+
 	}
 }
