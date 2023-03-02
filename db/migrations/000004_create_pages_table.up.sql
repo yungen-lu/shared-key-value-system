@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS pages (
+  id SERIAL NOT NULL PRIMARY KEY,
+  next_id SERIAL REFERENCES pages,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER set_timestamp_pages
+BEFORE UPDATE ON pages
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+

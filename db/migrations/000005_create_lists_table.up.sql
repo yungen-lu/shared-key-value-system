@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS lists (
+  id SERIAL NOT NULL PRIMARY KEY,
+  page_count INTEGER NOT NULL DEFAULT 0,
+  next_page_id SERIAL REFERENCES pages(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TRIGGER set_timestamp_lists
+BEFORE UPDATE ON lists
+FOR EACH ROW
+EXECUTE PROCEDURE trigger_set_timestamp();
+
+
