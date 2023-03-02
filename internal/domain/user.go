@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type User struct {
-	ID           uint64
+	ID           int32
 	Name         string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
@@ -11,5 +11,5 @@ type User struct {
 }
 
 type UserRepo interface {
-	GetByID(id uint64) (User, error)
+	GetByID(id int32) (User, error)
 }

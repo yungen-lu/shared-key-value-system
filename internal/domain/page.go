@@ -1,11 +1,11 @@
 package domain
 
 type Page struct {
-	ID         uint64 // key
+	ID         int32 // key
 	Articles   []Article
-	NextPageID uint64
+	NextPageID int32
 }
 
 type PageRepo interface {
-	GetPage(id uint64) (Page, error)
+	GetPage(id int32) (Page, error)
 }

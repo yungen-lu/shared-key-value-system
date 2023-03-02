@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type Article struct {
-	ID        uint64
+	ID        int32
 	Title     string
 	Content   string
 	Author    User
@@ -14,9 +14,9 @@ type Article struct {
 }
 
 type ArticleRepo interface {
-	GetByID(id uint64) (Article, error)
+	GetByID(id int32) (Article, error)
 	GetByTitle(title string) (Article, error)
 	Update(article *Article) error
 	Store(article *Article) error
-	DeleteByID(id uint64) error
+	DeleteByID(id int32) error
 }

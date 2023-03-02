@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type Topic struct {
-	ID          uint64
+	ID          int32
 	Name        string
 	Description string
 	PopularList List
@@ -13,5 +13,5 @@ type Topic struct {
 }
 
 type TopicRepo interface {
-	GetByID(id uint64) (Topic, error)
+	GetByID(id int32) (Topic, error)
 }

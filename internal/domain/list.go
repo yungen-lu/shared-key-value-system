@@ -1,11 +1,11 @@
 package domain
 
 type List struct {
-	ID         uint64
+	ID         int32
 	PageCount  uint16
-	NextPageID uint64
+	NextPageID int32
 }
 
 type ListRepo interface {
-	GetHead(id uint64) (List, error)
+	GetHead(id int32) (List, error)
 }
