@@ -1,9 +1,115 @@
 basePath: /v1
+definitions:
+  domain.Article:
+    properties:
+      author:
+        $ref: '#/definitions/domain.User'
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      tags:
+        description: TODO
+        type: string
+      title:
+        type: string
+      topic:
+        $ref: '#/definitions/domain.Topic'
+      updatedAt:
+        type: string
+    type: object
+  domain.List:
+    properties:
+      id:
+        type: integer
+      nextPageID:
+        type: integer
+      pageCount:
+        type: integer
+    type: object
+  domain.Page:
+    properties:
+      articles:
+        items:
+          $ref: '#/definitions/domain.Article'
+        type: array
+      id:
+        description: key
+        type: integer
+      nextPageID:
+        type: integer
+    type: object
+  domain.Topic:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      newestList:
+        $ref: '#/definitions/domain.List'
+      popularList:
+        $ref: '#/definitions/domain.List'
+      updatedAt:
+        type: string
+    type: object
+  domain.User:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      personalList:
+        $ref: '#/definitions/domain.List'
+      updatedAt:
+        type: string
+    type: object
 info:
   contact: {}
   title: Shared Key Value List System API
   version: "1.0"
 paths:
+  /head:
+    get:
+      consumes:
+      - application/json
+      description: test
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.List'
+            type: array
+      summary: Get all heads
+  /head/{id}:
+    get:
+      consumes:
+      - application/json
+      description: test
+      parameters:
+      - description: Head ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.List'
+      summary: Get a head by id
   /page:
     get:
       consumes:
@@ -13,8 +119,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: Hello World!
+          description: OK
           schema:
-            type: string
-      summary: Page API
+            items:
+              $ref: '#/definitions/domain.Page'
+            type: array
+      summary: Get all pages
+  /page/{id}:
+    get:
+      consumes:
+      - application/json
+      description: test
+      parameters:
+      - description: page ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Page'
+      summary: Get a page by id
 swagger: "2.0"

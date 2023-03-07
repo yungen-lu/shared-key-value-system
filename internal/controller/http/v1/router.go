@@ -9,9 +9,9 @@ import (
 	_ "github.com/yungen-lu/shared-key-value-list-system/docs"
 )
 
-// @title		Shared Key Value List System API
-// @version	1.0
-// @basePath	/v1
+//	@title		Shared Key Value List System API
+//	@version	1.0
+//	@basePath	/v1
 func NewRouter(handler *gin.Engine) {
 	handler.Use(gin.Recovery())
 	handler.GET("/healthz", func(ctx *gin.Context) {
@@ -19,7 +19,8 @@ func NewRouter(handler *gin.Engine) {
 	})
 	v1 := handler.Group("/v1")
 	{
-		v1.GET("/page", PageHandler)
+		newHeadRoutes(v1)
+		newPageRoutes(v1)
 	}
 	handler.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

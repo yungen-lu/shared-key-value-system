@@ -15,6 +15,58 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/head": {
+            "get": {
+                "description": "test",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get all heads",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.List"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/head/{id}": {
+            "get": {
+                "description": "test",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get a head by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Head ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.List"
+                        }
+                    }
+                }
+            }
+        },
         "/page": {
             "get": {
                 "description": "test",
@@ -24,14 +76,156 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Page API",
+                "summary": "Get all pages",
                 "responses": {
                     "200": {
-                        "description": "Hello World!",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Page"
+                            }
                         }
                     }
+                }
+            }
+        },
+        "/page/{id}": {
+            "get": {
+                "description": "test",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Get a page by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Page"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.Article": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/domain.User"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "description": "TODO",
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "topic": {
+                    "$ref": "#/definitions/domain.Topic"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.List": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "nextPageID": {
+                    "type": "integer"
+                },
+                "pageCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.Page": {
+            "type": "object",
+            "properties": {
+                "articles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.Article"
+                    }
+                },
+                "id": {
+                    "description": "key",
+                    "type": "integer"
+                },
+                "nextPageID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.Topic": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "newestList": {
+                    "$ref": "#/definitions/domain.List"
+                },
+                "popularList": {
+                    "$ref": "#/definitions/domain.List"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "personalList": {
+                    "$ref": "#/definitions/domain.List"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         }

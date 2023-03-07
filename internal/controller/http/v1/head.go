@@ -8,44 +8,44 @@ import (
 	"github.com/yungen-lu/shared-key-value-list-system/internal/usecase"
 )
 
-type pageRoutes struct {
+type headRoutes struct {
 	list usecase.List
 }
 
-func newPageRoutes(handler *gin.RouterGroup) {
-	r := &pageRoutes{}
-	h := handler.Group("/page")
+func newHeadRoutes(handler *gin.RouterGroup) {
+	r := &headRoutes{}
+	h := handler.Group("/head")
 	{
 		h.GET("/", r.getAll)
 		h.GET("/:id", r.getByID)
 	}
 }
 
-//	@Summary		Get all pages
+//	@Summary		Get all heads
 //	@Description	test
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{array}	domain.Page
+//	@Success		200	{array}	domain.List
 //	@Falure			500 {object}
-//	@Router			/page [get]
-func (r *pageRoutes) getAll(c *gin.Context) {
-	pages, err := r.list.GetPages(c)
+//	@Router			/head [get]
+func (r *headRoutes) getAll(c *gin.Context) {
+	lists, err := r.list.GetHeads(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
-	c.JSON(http.StatusOK, pages)
+	c.JSON(http.StatusOK, lists)
 }
 
-//	@Summary		Get a page by id
+//	@Summary		Get a head by id
 //	@Description	test
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		int	true	"page ID"
-//	@Success		200	{object}	domain.Page
+//	@Param			id	path		int	true	"Head ID"
+//	@Success		200	{object}	domain.List
 //	@Falure			500 {object}
-//	@Router			/page/{id} [get]
-func (r *pageRoutes) getByID(c *gin.Context) {
+//	@Router			/head/{id} [get]
+func (r *headRoutes) getByID(c *gin.Context) {
 	idStr, ok := c.Params.Get("id")
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{})
@@ -56,10 +56,10 @@ func (r *pageRoutes) getByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
-	page, err := r.list.GetPageByID(c, int32(id))
+	list, err := r.list.GetHeadByID(c, int32(id))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{})
 		return
 	}
-	c.JSON(http.StatusOK, page)
+	c.JSON(http.StatusOK, list)
 }
