@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type User struct {
 	ID           int32
@@ -11,5 +14,8 @@ type User struct {
 }
 
 type UserRepo interface {
-	GetByID(id int32) (User, error)
+	GetByID(ctx context.Context, id int32) (User, error)
+	GetAll(ctx context.Context) ([]User, error)
+	Store(ctx context.Context, user User) error
+	DeleteByID(ctx context.Context, id int32) error
 }

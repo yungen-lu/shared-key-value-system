@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Article struct {
 	ID        int32
@@ -14,9 +17,9 @@ type Article struct {
 }
 
 type ArticleRepo interface {
-	GetByID(id int32) (Article, error)
-	GetByTitle(title string) (Article, error)
-	Update(article *Article) error
-	Store(article *Article) error
-	DeleteByID(id int32) error
+	GetByID(ctx context.Context, id int32) (Article, error)
+	GetByTitle(ctx context.Context, title string) (Article, error)
+	// Update(ctx context.Context,article Article) error
+	Store(ctx context.Context, article Article) error
+	DeleteByID(ctx context.Context, id int32) error
 }

@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type List struct {
 	ID         int32
 	PageCount  uint16
@@ -7,5 +9,8 @@ type List struct {
 }
 
 type ListRepo interface {
-	GetHead(id int32) (List, error)
+	GetByID(ctx context.Context, id int32) (List, error)
+	GetAll(ctx context.Context) ([]List, error)
+	Store(ctx context.Context, list List) error
+	DeleteByID(ctx context.Context, id int32) error
 }
