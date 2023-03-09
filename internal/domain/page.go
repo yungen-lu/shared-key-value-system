@@ -8,6 +8,7 @@ type Page struct {
 	NextPageID int32
 }
 
+//go:generate mockgen -source=page.go -destination=mocks/mock_page.go -package=mocks
 type PageRepo interface {
 	GetByID(ctx context.Context, id int32) (Page, error)
 	GetAll(ctx context.Context) ([]Page, error)

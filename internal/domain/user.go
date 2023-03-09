@@ -13,6 +13,7 @@ type User struct {
 	PersonalList List
 }
 
+//go:generate mockgen -source=user.go -destination=mocks/mock_user.go -package=mocks
 type UserRepo interface {
 	GetByID(ctx context.Context, id int32) (User, error)
 	GetAll(ctx context.Context) ([]User, error)

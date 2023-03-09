@@ -16,6 +16,7 @@ type Article struct {
 	Tags      string // TODO
 }
 
+//go:generate mockgen -source=article.go -destination=mocks/mock_article.go -package=mocks
 type ArticleRepo interface {
 	GetByID(ctx context.Context, id int32) (Article, error)
 	GetByTitle(ctx context.Context, title string) (Article, error)

@@ -8,6 +8,7 @@ type List struct {
 	NextPageID int32
 }
 
+//go:generate mockgen -source=list.go -destination=mocks/mock_list.go -package=mocks
 type ListRepo interface {
 	GetByID(ctx context.Context, id int32) (List, error)
 	GetAll(ctx context.Context) ([]List, error)
