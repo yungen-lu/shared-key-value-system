@@ -7,7 +7,48 @@ package pgcodegen
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createList = `-- name: CreateList :one
+INSERT INTO lists (id, page_count, next_page_id) VALUES ($1, $2, $3) RETURNING id, page_count, next_page_id, created_at, updated_at
+`
+
+type CreateListParams struct {
+	ID         int32
+	PageCount  int32
+	NextPageID pgtype.Int4
+}
+
+func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (List, error) {
+	row := q.db.QueryRow(ctx, createList, arg.ID, arg.PageCount, arg.NextPageID)
+	var i List
+	err := row.Scan(
+		&i.ID,
+		&i.PageCount,
+		&i.NextPageID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const createPage = `-- name: CreatePage :one
+INSERT INTO pages (next_id) VALUES ($1) RETURNING id, next_id, created_at, updated_at
+`
+
+func (q *Queries) CreatePage(ctx context.Context, nextID pgtype.Int4) (Page, error) {
+	row := q.db.QueryRow(ctx, createPage, nextID)
+	var i Page
+	err := row.Scan(
+		&i.ID,
+		&i.NextID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
 
 const getArticleByID = `-- name: GetArticleByID :one
 SELECT id, title, content, author_id, topic_id, created_at, updated_at FROM articles
