@@ -80,11 +80,12 @@ func (mr *MockPageRepoMockRecorder) GetByID(ctx, id interface{}) *gomock.Call {
 }
 
 // Store mocks base method.
-func (m *MockPageRepo) Store(ctx context.Context, page domain.Page) error {
+func (m *MockPageRepo) Store(ctx context.Context, page domain.Page) (int32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Store", ctx, page)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int32)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Store indicates an expected call of Store.

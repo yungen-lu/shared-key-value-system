@@ -80,11 +80,12 @@ func (mr *MockListRepoMockRecorder) GetByID(ctx, id interface{}) *gomock.Call {
 }
 
 // Store mocks base method.
-func (m *MockListRepo) Store(ctx context.Context, list domain.List) error {
+func (m *MockListRepo) Store(ctx context.Context, list domain.List) (int32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Store", ctx, list)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(int32)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Store indicates an expected call of Store.
