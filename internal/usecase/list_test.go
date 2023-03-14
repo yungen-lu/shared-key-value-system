@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +29,7 @@ func list(t *testing.T) (*usecase.ListUseCase, *mocks.MockListRepo, *mocks.MockP
 	defer mockCtl.Finish()
 	listRepo := mocks.NewMockListRepo(mockCtl)
 	pageRepo := mocks.NewMockPageRepo(mockCtl)
-	list := usecase.NewListUseCase(listRepo, pageRepo)
+	list := usecase.NewListUseCase(listRepo, pageRepo, 5*time.Second)
 	return list, listRepo, pageRepo
 }
 func TestGetHeads(t *testing.T) {
@@ -66,41 +67,6 @@ func TestGetHeads(t *testing.T) {
 
 }
 
-func TestGetHeadByID(t *testing.T) {
-	t.Parallel()
-
-	listUseCase, listRepo, _ := list(t)
-	tests := []test{
-		{
-			name: "error result",
-			mock: func() {
-				listRepo.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(nil, domain.ErrInernalServerError)
-			},
-			res: domain.List{},
-			err: domain.ErrInernalServerError,
-		},
-		{
-			name: "success result",
-			mock: func() {
-				listRepo.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(domain.List{}, nil)
-			},
-			res: domain.List{},
-			err: nil,
-		},
-	}
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-			tc.mock()
-
-			res, err := listUseCase.GetHeadByID(context.Background(), 1)
-			assert.Equal(t, tc.res, res)
-			assert.ErrorIs(t, tc.err, err)
-		})
-	}
-}
-
 func TestGetPages(t *testing.T) {
 	t.Parallel()
 
@@ -135,25 +101,24 @@ func TestGetPages(t *testing.T) {
 	}
 }
 
-func TestGetPageByID(t *testing.T) {
+func TestGetPageByKey(t *testing.T) {
 	t.Parallel()
-
-	listUseCase, _, pageRepo := list(t)
+	listUsecase, _, pageRepo := list(t)
 	tests := []test{
 		{
 			name: "error result",
 			mock: func() {
-				pageRepo.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return(nil, domain.ErrInernalServerError)
+				pageRepo.EXPECT().GetByKey(gomock.Any(), gomock.Eq("key")).Return(domain.Page{}, domain.ErrInernalServerError)
 			},
-			res: []domain.Page(nil),
+			res: domain.Page{},
 			err: domain.ErrInernalServerError,
 		},
 		{
 			name: "success result",
 			mock: func() {
-				pageRepo.EXPECT().GetByID(gomock.Any(), gomock.Any()).Return([]domain.Page{}, nil)
+				pageRepo.EXPECT().GetByKey(gomock.Any(), gomock.Eq("key")).Return(domain.Page{}, nil)
 			},
-			res: []domain.Page{},
+			res: domain.Page{},
 			err: nil,
 		},
 	}
@@ -162,8 +127,135 @@ func TestGetPageByID(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			tc.mock()
-			res, err := listUseCase.GetPageByID(context.Background(), 1)
+			res, err := listUsecase.GetPageByKey(context.Background(), "key")
 			assert.Equal(t, tc.res, res)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestGetHeadByKey(t *testing.T) {
+	t.Parallel()
+
+	listUsecase, listRepo, _ := list(t)
+	tests := []test{
+		{
+			name: "error result",
+			mock: func() {
+				listRepo.EXPECT().GetByKey(gomock.Any(), gomock.Eq("key")).Return(domain.List{}, domain.ErrInernalServerError)
+			},
+			res: domain.List{},
+			err: domain.ErrInernalServerError,
+		},
+		{
+			name: "success result",
+			mock: func() {
+				listRepo.EXPECT().GetByKey(gomock.Any(), gomock.Eq("key")).Return(domain.List{}, nil)
+			},
+			res: domain.List{},
+			err: nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			tc.mock()
+			res, err := listUsecase.GetHeadByKey(context.Background(), "key")
+			assert.Equal(t, tc.res, res)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestCreateHead(t *testing.T) {
+	t.Parallel()
+
+	listUsecase, listRepo, _ := list(t)
+	tests := []test{
+		{
+			name: "error result",
+			mock: func() {
+				listRepo.EXPECT().Store(gomock.Any(), domain.List{}).Return(domain.ErrInernalServerError)
+			},
+			err: domain.ErrInernalServerError,
+		},
+		{
+			name: "success result",
+			mock: func() {
+				listRepo.EXPECT().Store(gomock.Any(), domain.List{}).Return(nil)
+			},
+			err: nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			tc.mock()
+			err := listUsecase.CreateHead(context.Background(), domain.List{})
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestCreatePage(t *testing.T) {
+	t.Parallel()
+
+	listUsecase, _, pageRepo := list(t)
+	tests := []test{
+		{
+			name: "error result",
+			mock: func() {
+				pageRepo.EXPECT().Store(gomock.Any(), domain.Page{}).Return(domain.ErrInernalServerError)
+			},
+			err: domain.ErrInernalServerError,
+		},
+		{
+			name: "success result",
+			mock: func() {
+				pageRepo.EXPECT().Store(gomock.Any(), domain.Page{}).Return(nil)
+			},
+			err: nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			tc.mock()
+			err := listUsecase.CreatePage(context.Background(), domain.Page{})
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestUpdateHeadByKey(t *testing.T) {
+	t.Parallel()
+
+	listUsecase, listRepo, _ := list(t)
+	tests := []test{
+		{
+			name: "error result",
+			mock: func() {
+				listRepo.EXPECT().UpdateByKey(gomock.Any(), gomock.Eq("key"), domain.List{}).Return(domain.ErrInernalServerError)
+			},
+			err: domain.ErrInernalServerError,
+		},
+		{
+			name: "success result",
+			mock: func() {
+				listRepo.EXPECT().UpdateByKey(gomock.Any(), gomock.Eq("key"), domain.List{}).Return(nil)
+			},
+			err: nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			tc.mock()
+			err := listUsecase.UpdateHeadByKey(context.Background(), "key", domain.List{})
 			assert.ErrorIs(t, tc.err, err)
 		})
 	}

@@ -79,17 +79,45 @@ func (mr *MockPageRepoMockRecorder) GetByID(ctx, id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockPageRepo)(nil).GetByID), ctx, id)
 }
 
-// Store mocks base method.
-func (m *MockPageRepo) Store(ctx context.Context, page domain.Page) (int32, error) {
+// GetByKey mocks base method.
+func (m *MockPageRepo) GetByKey(ctx context.Context, key string) (domain.Page, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Store", ctx, page)
-	ret0, _ := ret[0].(int32)
+	ret := m.ctrl.Call(m, "GetByKey", ctx, key)
+	ret0, _ := ret[0].(domain.Page)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
+}
+
+// GetByKey indicates an expected call of GetByKey.
+func (mr *MockPageRepoMockRecorder) GetByKey(ctx, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByKey", reflect.TypeOf((*MockPageRepo)(nil).GetByKey), ctx, key)
+}
+
+// Store mocks base method.
+func (m *MockPageRepo) Store(ctx context.Context, page domain.Page) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Store", ctx, page)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Store indicates an expected call of Store.
 func (mr *MockPageRepoMockRecorder) Store(ctx, page interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockPageRepo)(nil).Store), ctx, page)
+}
+
+// UpdateByKey mocks base method.
+func (m *MockPageRepo) UpdateByKey(ctx context.Context, key string, page domain.Page) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateByKey", ctx, key, page)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateByKey indicates an expected call of UpdateByKey.
+func (mr *MockPageRepoMockRecorder) UpdateByKey(ctx, key, page interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateByKey", reflect.TypeOf((*MockPageRepo)(nil).UpdateByKey), ctx, key, page)
 }
