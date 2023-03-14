@@ -15,10 +15,11 @@ type ListUseCase struct {
 
 var _ List = (*ListUseCase)(nil)
 
-func NewListUseCase(listRepo domain.ListRepo, pageRepo domain.PageRepo) *ListUseCase {
+func NewListUseCase(listRepo domain.ListRepo, pageRepo domain.PageRepo, timeout time.Duration) *ListUseCase {
 	return &ListUseCase{
-		l: listRepo,
-		p: pageRepo,
+		l:              listRepo,
+		p:              pageRepo,
+		contextTimeout: timeout,
 	}
 }
 
@@ -34,6 +35,12 @@ func (uc *ListUseCase) GetHeadByID(ctx context.Context, id int32) (domain.List, 
 	return uc.l.GetByID(c, id)
 }
 
+func (uc *ListUseCase) GetHeadByKey(ctx context.Context, key string) (domain.List, error) {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.l.GetByKey(c, key)
+}
+
 func (uc *ListUseCase) GetPages(ctx context.Context) ([]domain.Page, error) {
 	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
 	defer cancel()
@@ -44,4 +51,36 @@ func (uc *ListUseCase) GetPageByID(ctx context.Context, id int32) (domain.Page, 
 	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
 	defer cancel()
 	return uc.p.GetByID(c, id)
+}
+
+func (uc *ListUseCase) GetPageByKey(ctx context.Context, key string) (domain.Page, error) {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.p.GetByKey(c, key)
+}
+
+func (uc *ListUseCase) CreateHead(ctx context.Context, list domain.List) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.l.Store(c, list)
+}
+
+func (uc *ListUseCase) CreatePage(ctx context.Context, page domain.Page) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.p.Store(c, page)
+}
+
+// CreatePage(ctx context.Context, page domain.Page) error
+
+func (uc *ListUseCase) UpdateHeadByKey(ctx context.Context, key string, list domain.List) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.l.UpdateByKey(c, key, list)
+}
+
+func (uc *ListUseCase) UpdatePageByKey(ctx context.Context, key string, page domain.Page) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.p.UpdateByKey(c, key, page)
 }

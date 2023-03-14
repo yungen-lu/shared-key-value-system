@@ -9,6 +9,8 @@ import (
 	"github.com/yungen-lu/shared-key-value-list-system/internal/domain"
 )
 
+var _ domain.PageRepo = (*PageRepo)(nil)
+
 type PageRepo struct {
 	queries *pgcodegen.Queries
 }
@@ -35,6 +37,22 @@ func (p *PageRepo) GetByID(ctx context.Context, id int32) (domain.Page, error) {
 	return outputPage, nil
 }
 
+func (p *PageRepo) GetByKey(ctx context.Context, key string) (domain.Page, error) {
+	var outputPage domain.Page
+	page, err := p.queries.GetPageByKey(ctx, key)
+	if err != nil {
+		return outputPage, err
+	}
+	outputPage.ID = page.ID
+	outputPage.Key = page.Key
+	if page.NextID.Valid {
+		outputPage.NextPageID = &page.NextID.Int32
+	} else {
+		outputPage.NextPageID = nil
+	}
+	return outputPage, nil
+}
+
 func (p *PageRepo) GetAll(ctx context.Context) ([]domain.Page, error) {
 	pages, err := p.queries.ListPages(ctx)
 	if err != nil {
@@ -53,17 +71,32 @@ func (p *PageRepo) GetAll(ctx context.Context) ([]domain.Page, error) {
 	return outputPages, nil
 
 }
-func (p *PageRepo) Store(ctx context.Context, page domain.Page) (int32, error) {
-	if page.NextPageID == nil {
-		return 0, domain.ErrBadParamInput
+func (p *PageRepo) Store(ctx context.Context, page domain.Page) error {
+	var param pgcodegen.CreatePageParams
+	param.Key = page.Key
+	if page.NextPageID != nil {
+		param.NextID = pgtype.Int4{Int32: *page.NextPageID, Valid: true}
+	} else {
+		param.NextID = pgtype.Int4{Valid: false}
 	}
-	r, err := p.queries.CreatePage(ctx, pgtype.Int4{Int32: *page.NextPageID, Valid: true})
-	if err != nil {
-		return 0, err
-	}
-	return r.ID, nil
+	_, err := p.queries.CreatePage(ctx, param)
+	return err
 }
 
 func (p *PageRepo) DeleteByID(ctx context.Context, id int32) error {
 	return nil
+}
+
+// UpdateByKey(ctx context.Context, key string, update PageUpdate) error
+func (p *PageRepo) UpdateByKey(ctx context.Context, key string, page domain.Page) error {
+	var param pgcodegen.UpdatePageByKeyParams
+	param.Oldkey = key
+	param.Key = page.Key
+	if page.NextPageID != nil {
+		param.NextID = pgtype.Int4{Int32: *page.NextPageID, Valid: true}
+	} else {
+		param.NextID = pgtype.Int4{Valid: false}
+	}
+	_, err := p.queries.UpdatePageByKey(ctx, param)
+	return err
 }

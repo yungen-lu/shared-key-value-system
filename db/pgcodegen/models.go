@@ -20,6 +20,7 @@ type Article struct {
 
 type List struct {
 	ID         int32
+	Key        string
 	PageCount  int32
 	NextPageID pgtype.Int4
 	CreatedAt  pgtype.Timestamptz
@@ -28,6 +29,7 @@ type List struct {
 
 type Page struct {
 	ID        int32
+	Key       string
 	NextID    pgtype.Int4
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
