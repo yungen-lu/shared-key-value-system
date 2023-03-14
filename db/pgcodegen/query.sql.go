@@ -12,23 +12,23 @@ import (
 )
 
 const createList = `-- name: CreateList :one
-INSERT INTO lists (key, page_count, next_page_id) VALUES ($1, $2, $3) RETURNING id, key, page_count, next_page_id, created_at, updated_at
+INSERT INTO lists (key, page_count, next_page_key) VALUES ($1, $2, $3) RETURNING id, key, page_count, next_page_key, created_at, updated_at
 `
 
 type CreateListParams struct {
-	Key        string
-	PageCount  int32
-	NextPageID pgtype.Int4
+	Key         string
+	PageCount   int32
+	NextPageKey pgtype.Text
 }
 
 func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (List, error) {
-	row := q.db.QueryRow(ctx, createList, arg.Key, arg.PageCount, arg.NextPageID)
+	row := q.db.QueryRow(ctx, createList, arg.Key, arg.PageCount, arg.NextPageKey)
 	var i List
 	err := row.Scan(
 		&i.ID,
 		&i.Key,
 		&i.PageCount,
-		&i.NextPageID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -36,21 +36,21 @@ func (q *Queries) CreateList(ctx context.Context, arg CreateListParams) (List, e
 }
 
 const createPage = `-- name: CreatePage :one
-INSERT INTO pages (key, next_id) VALUES ($1, $2) RETURNING id, key, next_id, created_at, updated_at
+INSERT INTO pages (key, next_page_key) VALUES ($1, $2) RETURNING id, key, next_page_key, created_at, updated_at
 `
 
 type CreatePageParams struct {
-	Key    string
-	NextID pgtype.Int4
+	Key         string
+	NextPageKey pgtype.Text
 }
 
 func (q *Queries) CreatePage(ctx context.Context, arg CreatePageParams) (Page, error) {
-	row := q.db.QueryRow(ctx, createPage, arg.Key, arg.NextID)
+	row := q.db.QueryRow(ctx, createPage, arg.Key, arg.NextPageKey)
 	var i Page
 	err := row.Scan(
 		&i.ID,
 		&i.Key,
-		&i.NextID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -78,7 +78,7 @@ func (q *Queries) GetArticleByID(ctx context.Context, id int32) (Article, error)
 }
 
 const getListByID = `-- name: GetListByID :one
-SELECT id, key, page_count, next_page_id, created_at, updated_at FROM lists
+SELECT id, key, page_count, next_page_key, created_at, updated_at FROM lists
 WHERE id = $1 LIMIT 1
 `
 
@@ -89,7 +89,7 @@ func (q *Queries) GetListByID(ctx context.Context, id int32) (List, error) {
 		&i.ID,
 		&i.Key,
 		&i.PageCount,
-		&i.NextPageID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -97,7 +97,7 @@ func (q *Queries) GetListByID(ctx context.Context, id int32) (List, error) {
 }
 
 const getListByKey = `-- name: GetListByKey :one
-SELECT id, key, page_count, next_page_id, created_at, updated_at FROM lists
+SELECT id, key, page_count, next_page_key, created_at, updated_at FROM lists
 WHERE key = $1 LIMIT 1
 `
 
@@ -108,7 +108,7 @@ func (q *Queries) GetListByKey(ctx context.Context, key string) (List, error) {
 		&i.ID,
 		&i.Key,
 		&i.PageCount,
-		&i.NextPageID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -116,7 +116,7 @@ func (q *Queries) GetListByKey(ctx context.Context, key string) (List, error) {
 }
 
 const getPageByID = `-- name: GetPageByID :one
-SELECT id, key, next_id, created_at, updated_at FROM pages
+SELECT id, key, next_page_key, created_at, updated_at FROM pages
 WHERE id = $1 LIMIT 1
 `
 
@@ -126,7 +126,7 @@ func (q *Queries) GetPageByID(ctx context.Context, id int32) (Page, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Key,
-		&i.NextID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -134,7 +134,7 @@ func (q *Queries) GetPageByID(ctx context.Context, id int32) (Page, error) {
 }
 
 const getPageByKey = `-- name: GetPageByKey :one
-SELECT id, key, next_id, created_at, updated_at FROM pages
+SELECT id, key, next_page_key, created_at, updated_at FROM pages
 WHERE key = $1 LIMIT 1
 `
 
@@ -144,7 +144,7 @@ func (q *Queries) GetPageByKey(ctx context.Context, key string) (Page, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Key,
-		&i.NextID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -220,7 +220,7 @@ func (q *Queries) ListArticles(ctx context.Context) ([]Article, error) {
 }
 
 const listLists = `-- name: ListLists :many
-SELECT id, key, page_count, next_page_id, created_at, updated_at FROM lists
+SELECT id, key, page_count, next_page_key, created_at, updated_at FROM lists
 ORDER BY created_at
 `
 
@@ -237,7 +237,7 @@ func (q *Queries) ListLists(ctx context.Context) ([]List, error) {
 			&i.ID,
 			&i.Key,
 			&i.PageCount,
-			&i.NextPageID,
+			&i.NextPageKey,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -252,7 +252,7 @@ func (q *Queries) ListLists(ctx context.Context) ([]List, error) {
 }
 
 const listPages = `-- name: ListPages :many
-SELECT id, key, next_id, created_at, updated_at FROM pages
+SELECT id, key, next_page_key, created_at, updated_at FROM pages
 ORDER BY created_at
 `
 
@@ -268,7 +268,7 @@ func (q *Queries) ListPages(ctx context.Context) ([]Page, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Key,
-			&i.NextID,
+			&i.NextPageKey,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -346,26 +346,24 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 const updateListByKey = `-- name: UpdateListByKey :one
 UPDATE lists
 SET
-  key = $1,
-  next_page_id = $2
-WHERE key = $3
-RETURNING id, key, page_count, next_page_id, created_at, updated_at
+  next_page_key = $1
+WHERE key = $2
+RETURNING id, key, page_count, next_page_key, created_at, updated_at
 `
 
 type UpdateListByKeyParams struct {
-	Key        string
-	NextPageID pgtype.Int4
-	Oldkey     string
+	NextPageKey pgtype.Text
+	Key         string
 }
 
 func (q *Queries) UpdateListByKey(ctx context.Context, arg UpdateListByKeyParams) (List, error) {
-	row := q.db.QueryRow(ctx, updateListByKey, arg.Key, arg.NextPageID, arg.Oldkey)
+	row := q.db.QueryRow(ctx, updateListByKey, arg.NextPageKey, arg.Key)
 	var i List
 	err := row.Scan(
 		&i.ID,
 		&i.Key,
 		&i.PageCount,
-		&i.NextPageID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -375,25 +373,23 @@ func (q *Queries) UpdateListByKey(ctx context.Context, arg UpdateListByKeyParams
 const updatePageByKey = `-- name: UpdatePageByKey :one
 UPDATE pages
 SET
-  key = $1,
-  next_id = $2
-WHERE key = $3
-RETURNING id, key, next_id, created_at, updated_at
+  next_page_key = $1
+WHERE key = $2
+RETURNING id, key, next_page_key, created_at, updated_at
 `
 
 type UpdatePageByKeyParams struct {
-	Key    string
-	NextID pgtype.Int4
-	Oldkey string
+	NextPageKey pgtype.Text
+	Key         string
 }
 
 func (q *Queries) UpdatePageByKey(ctx context.Context, arg UpdatePageByKeyParams) (Page, error) {
-	row := q.db.QueryRow(ctx, updatePageByKey, arg.Key, arg.NextID, arg.Oldkey)
+	row := q.db.QueryRow(ctx, updatePageByKey, arg.NextPageKey, arg.Key)
 	var i Page
 	err := row.Scan(
 		&i.ID,
 		&i.Key,
-		&i.NextID,
+		&i.NextPageKey,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

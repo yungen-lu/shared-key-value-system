@@ -29,10 +29,10 @@ func (p *PageRepo) GetByID(ctx context.Context, id int32) (domain.Page, error) {
 	}
 	outputPage.ID = page.ID
 	// outputPage.Articles = page.Articles
-	if page.NextID.Valid {
-		outputPage.NextPageID = &page.NextID.Int32
+	if page.NextPageKey.Valid {
+		outputPage.NextPageKey = &page.NextPageKey.String
 	} else {
-		outputPage.NextPageID = nil
+		outputPage.NextPageKey = nil
 	}
 	return outputPage, nil
 }
@@ -45,10 +45,10 @@ func (p *PageRepo) GetByKey(ctx context.Context, key string) (domain.Page, error
 	}
 	outputPage.ID = page.ID
 	outputPage.Key = page.Key
-	if page.NextID.Valid {
-		outputPage.NextPageID = &page.NextID.Int32
+	if page.NextPageKey.Valid {
+		outputPage.NextPageKey = &page.NextPageKey.String
 	} else {
-		outputPage.NextPageID = nil
+		outputPage.NextPageKey = nil
 	}
 	return outputPage, nil
 }
@@ -62,10 +62,10 @@ func (p *PageRepo) GetAll(ctx context.Context) ([]domain.Page, error) {
 	for i := 0; i < len(pages); i++ {
 		outputPages[i].ID = pages[i].ID
 		// outputPages[i].Articles = pages[i].Articles
-		if pages[i].NextID.Valid {
-			outputPages[i].NextPageID = &pages[i].NextID.Int32
+		if pages[i].NextPageKey.Valid {
+			outputPages[i].NextPageKey = &pages[i].NextPageKey.String
 		} else {
-			outputPages[i].NextPageID = nil
+			outputPages[i].NextPageKey = nil
 		}
 	}
 	return outputPages, nil
@@ -74,10 +74,10 @@ func (p *PageRepo) GetAll(ctx context.Context) ([]domain.Page, error) {
 func (p *PageRepo) Store(ctx context.Context, page domain.Page) error {
 	var param pgcodegen.CreatePageParams
 	param.Key = page.Key
-	if page.NextPageID != nil {
-		param.NextID = pgtype.Int4{Int32: *page.NextPageID, Valid: true}
+	if page.NextPageKey != nil {
+		param.NextPageKey = pgtype.Text{String: *page.NextPageKey, Valid: true}
 	} else {
-		param.NextID = pgtype.Int4{Valid: false}
+		param.NextPageKey = pgtype.Text{Valid: false}
 	}
 	_, err := p.queries.CreatePage(ctx, param)
 	return err
@@ -87,15 +87,13 @@ func (p *PageRepo) DeleteByID(ctx context.Context, id int32) error {
 	return nil
 }
 
-// UpdateByKey(ctx context.Context, key string, update PageUpdate) error
 func (p *PageRepo) UpdateByKey(ctx context.Context, key string, page domain.Page) error {
 	var param pgcodegen.UpdatePageByKeyParams
-	param.Oldkey = key
-	param.Key = page.Key
-	if page.NextPageID != nil {
-		param.NextID = pgtype.Int4{Int32: *page.NextPageID, Valid: true}
+	param.Key = key
+	if page.NextPageKey != nil {
+		param.NextPageKey = pgtype.Text{String: *page.NextPageKey, Valid: true}
 	} else {
-		param.NextID = pgtype.Int4{Valid: false}
+		param.NextPageKey = pgtype.Text{Valid: false}
 	}
 	_, err := p.queries.UpdatePageByKey(ctx, param)
 	return err

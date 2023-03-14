@@ -3,10 +3,10 @@ package domain
 import "context"
 
 type Page struct {
-	ID         int32
-	Key        string
-	Articles   []Article
-	NextPageID *int32
+	ID          int32
+	Key         string
+	Articles    []Article
+	NextPageKey *string
 }
 
 //go:generate mockgen -source=page.go -destination=mocks/mock_page.go -package=mocks

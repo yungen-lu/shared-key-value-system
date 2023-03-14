@@ -97,8 +97,8 @@ func (r *headRoutes) getByID(c *gin.Context) {
 
 type createHeadRequest struct {
 	// ID         int32 `json:"id" binding:"required"`
-	Key        string `json:"key" binding:"required"`
-	NextPageID *int32 `json:"next_page_id"`
+	Key         string  `json:"key" binding:"required"`
+	NextPageKey *string `json:"next_page_key"`
 }
 
 // @Summary		Create a head
@@ -115,7 +115,7 @@ func (r *headRoutes) create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
-	err := r.list.CreateHead(c, domain.List{Key: req.Key, NextPageID: req.NextPageID})
+	err := r.list.CreateHead(c, domain.List{Key: req.Key, NextPageKey: req.NextPageKey})
 	if err != nil {
 		log.Error("http - v1 - head - create - CreateHead", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
@@ -125,8 +125,7 @@ func (r *headRoutes) create(c *gin.Context) {
 }
 
 type updateHeadRequest struct {
-	Key        *string `json:"key"`
-	NextPageID *int32  `json:"next_page_id"`
+	NextPageKey *string `json:"next_page_key"`
 }
 
 // @Summary Update a head
@@ -149,8 +148,7 @@ func (r *headRoutes) update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
-	// err := r.list.UpdateHeadByKey(c, key, domain.ListUpdate{Key: req.Key, NextPageID: req.NextPageID})
-	err := r.list.UpdateHeadByKey(c, key, domain.List{Key: *req.Key, NextPageID: req.NextPageID})
+	err := r.list.UpdateHeadByKey(c, key, domain.List{NextPageKey: req.NextPageKey})
 	if err != nil {
 		log.Error("http - v1 - head - update - UpdateHeadByKey", "err", err)
 		c.JSON(http.StatusInternalServerError, gin.H{})
