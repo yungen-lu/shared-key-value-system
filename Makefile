@@ -10,7 +10,7 @@ migrate-up:
 	migrate -database 'postgresql://postgres@localhost:5432/postgres?sslmode=disable' -path db/migrations up
 
 migrate-down:
-	migrate -database 'postgresql://postgres@localhost:5432/postgres?sslmode=disable' -path db/migrations up
+	migrate -database 'postgresql://postgres@localhost:5432/postgres?sslmode=disable' -path db/migrations down
 
 generate:
 	go generate ./...
