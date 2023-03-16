@@ -6,7 +6,7 @@ import (
 	"github.com/yungen-lu/shared-key-value-list-system/internal/domain"
 )
 
-//go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=usecase_test
+//go:generate mockgen -source=interfaces.go -destination=./mocks/usecase_mocks.go -package=mocks
 type List interface {
 	GetHeads(ctx context.Context) ([]domain.List, error)
 	GetHeadByID(ctx context.Context, id int32) (domain.List, error)

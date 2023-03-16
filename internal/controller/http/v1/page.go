@@ -95,7 +95,7 @@ func (r *pageRoutes) getByID(c *gin.Context) {
 	c.JSON(http.StatusOK, page)
 }
 
-type createPageRequest struct {
+type CreatePageRequest struct {
 	Key         string  `json:"key" binding:"required"`
 	NextPageKey *string `json:"next_page_key"`
 }
@@ -110,7 +110,7 @@ type createPageRequest struct {
 // @Router			/page [post]
 
 func (r *pageRoutes) create(c *gin.Context) {
-	var req createPageRequest
+	var req CreatePageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
@@ -124,7 +124,7 @@ func (r *pageRoutes) create(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-type updatePageRequest struct {
+type UpdatePageRequest struct {
 	NextPageKey *string `json:"next_page_key"`
 }
 
@@ -143,7 +143,7 @@ func (r *pageRoutes) update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
-	var req updatePageRequest
+	var req UpdatePageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return

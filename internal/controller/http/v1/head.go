@@ -95,7 +95,7 @@ func (r *headRoutes) getByID(c *gin.Context) {
 	c.JSON(http.StatusOK, list)
 }
 
-type createHeadRequest struct {
+type CreateHeadRequest struct {
 	// ID         int32 `json:"id" binding:"required"`
 	Key         string  `json:"key" binding:"required"`
 	NextPageKey *string `json:"next_page_key"`
@@ -110,7 +110,7 @@ type createHeadRequest struct {
 // @Falure			500 {object}
 // @Router			/head [post]
 func (r *headRoutes) create(c *gin.Context) {
-	var req createHeadRequest
+	var req CreateHeadRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
@@ -124,7 +124,7 @@ func (r *headRoutes) create(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-type updateHeadRequest struct {
+type UpdateHeadRequest struct {
 	NextPageKey *string `json:"next_page_key"`
 }
 
@@ -143,7 +143,7 @@ func (r *headRoutes) update(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
-	var req updateHeadRequest
+	var req UpdateHeadRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
