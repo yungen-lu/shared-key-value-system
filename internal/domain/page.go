@@ -17,4 +17,5 @@ type PageRepo interface {
 	Store(ctx context.Context, page Page) error
 	UpdateByKey(ctx context.Context, key string, page Page) error
 	DeleteByID(ctx context.Context, id int32) error
+	DeleteByKey(ctx context.Context, key string) error
 }

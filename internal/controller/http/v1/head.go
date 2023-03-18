@@ -24,6 +24,7 @@ func NewHeadRoutes(handler *gin.RouterGroup, listUseCase usecase.List) {
 		h.GET("/:key", r.getByKey)
 		h.POST("", r.create)
 		h.PUT("/:key", r.update)
+		h.DELETE("/:key", r.delete)
 	}
 }
 
@@ -38,7 +39,8 @@ func (r *headRoutes) getAll(c *gin.Context) {
 	lists, err := r.list.GetHeads(c)
 	if err != nil {
 		log.Error("http - v1 - head - getAll - GetHeads", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, lists)
@@ -61,7 +63,8 @@ func (r *headRoutes) getByKey(c *gin.Context) {
 	list, err := r.list.GetHeadByKey(c, key)
 	if err != nil {
 		log.Error("http - v1 - head - getByKey - GetHeadByKey", "err", err, "key", key)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, list)
@@ -89,7 +92,8 @@ func (r *headRoutes) getByID(c *gin.Context) {
 	list, err := r.list.GetHeadByID(c, int32(id))
 	if err != nil {
 		log.Error("http - v1 - head - getByID - GetHeadByID", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, list)
@@ -118,7 +122,8 @@ func (r *headRoutes) create(c *gin.Context) {
 	err := r.list.CreateHead(c, domain.List{Key: req.Key, NextPageKey: req.NextPageKey})
 	if err != nil {
 		log.Error("http - v1 - head - create - CreateHead", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})
@@ -151,7 +156,28 @@ func (r *headRoutes) update(c *gin.Context) {
 	err := r.list.UpdateHeadByKey(c, key, domain.List{NextPageKey: req.NextPageKey})
 	if err != nil {
 		log.Error("http - v1 - head - update - UpdateHeadByKey", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+// @Summary Delete a head
+// @Description test
+// @Success 200
+// @Failure 500 {object}
+func (r *headRoutes) delete(c *gin.Context) {
+	key, ok := c.Params.Get("key")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	err := r.list.DeleteHeadByKey(c, key)
+	if err != nil {
+		log.Error("http - v1 - head - delete - DeleteHeadByKey", "err", err)
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})

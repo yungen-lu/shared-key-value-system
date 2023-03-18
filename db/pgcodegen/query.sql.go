@@ -57,6 +57,32 @@ func (q *Queries) CreatePage(ctx context.Context, arg CreatePageParams) (Page, e
 	return i, err
 }
 
+const deleteListByKey = `-- name: DeleteListByKey :execrows
+DELETE FROM lists
+WHERE key = $1
+`
+
+func (q *Queries) DeleteListByKey(ctx context.Context, key string) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteListByKey, key)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const deletePageByKey = `-- name: DeletePageByKey :execrows
+DELETE FROM pages
+WHERE key = $1
+`
+
+func (q *Queries) DeletePageByKey(ctx context.Context, key string) (int64, error) {
+	result, err := q.db.Exec(ctx, deletePageByKey, key)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getArticleByID = `-- name: GetArticleByID :one
 SELECT id, title, content, author_id, topic_id, created_at, updated_at FROM articles
 WHERE id = $1 LIMIT 1

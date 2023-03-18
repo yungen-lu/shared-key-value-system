@@ -63,6 +63,34 @@ func (mr *MockListMockRecorder) CreatePage(ctx, page interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreatePage", reflect.TypeOf((*MockList)(nil).CreatePage), ctx, page)
 }
 
+// DeleteHeadByKey mocks base method.
+func (m *MockList) DeleteHeadByKey(ctx context.Context, key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteHeadByKey", ctx, key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteHeadByKey indicates an expected call of DeleteHeadByKey.
+func (mr *MockListMockRecorder) DeleteHeadByKey(ctx, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHeadByKey", reflect.TypeOf((*MockList)(nil).DeleteHeadByKey), ctx, key)
+}
+
+// DeletePageByKey mocks base method.
+func (m *MockList) DeletePageByKey(ctx context.Context, key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeletePageByKey", ctx, key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeletePageByKey indicates an expected call of DeletePageByKey.
+func (mr *MockListMockRecorder) DeletePageByKey(ctx, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeletePageByKey", reflect.TypeOf((*MockList)(nil).DeletePageByKey), ctx, key)
+}
+
 // GetHeadByID mocks base method.
 func (m *MockList) GetHeadByID(ctx context.Context, id int32) (domain.List, error) {
 	m.ctrl.T.Helper()

@@ -29,6 +29,10 @@ SET
 WHERE key = $2
 RETURNING *;
 
+-- name: DeletePageByKey :execrows
+DELETE FROM pages
+WHERE key = $1;
+
 
 -- name: ListPages :many
 SELECT * FROM pages
@@ -58,6 +62,10 @@ ORDER BY created_at;
 
 -- name: CreateList :one
 INSERT INTO lists (key, page_count, next_page_key) VALUES ($1, $2, $3) RETURNING *;
+
+-- name: DeleteListByKey :execrows
+DELETE FROM lists
+WHERE key = $1;
 
 -- name: GetArticleByID :one
 SELECT * FROM articles

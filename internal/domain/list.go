@@ -18,4 +18,5 @@ type ListRepo interface {
 	UpdateByKey(ctx context.Context, key string, list List) error
 	// Update(ctx context.Context, list List) error
 	DeleteByID(ctx context.Context, id int32) error
+	DeleteByKey(ctx context.Context, key string) error
 }

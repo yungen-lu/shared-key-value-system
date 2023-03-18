@@ -49,6 +49,20 @@ func (mr *MockListRepoMockRecorder) DeleteByID(ctx, id interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByID", reflect.TypeOf((*MockListRepo)(nil).DeleteByID), ctx, id)
 }
 
+// DeleteByKey mocks base method.
+func (m *MockListRepo) DeleteByKey(ctx context.Context, key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteByKey", ctx, key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteByKey indicates an expected call of DeleteByKey.
+func (mr *MockListRepoMockRecorder) DeleteByKey(ctx, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByKey", reflect.TypeOf((*MockListRepo)(nil).DeleteByKey), ctx, key)
+}
+
 // GetAll mocks base method.
 func (m *MockListRepo) GetAll(ctx context.Context) ([]domain.List, error) {
 	m.ctrl.T.Helper()

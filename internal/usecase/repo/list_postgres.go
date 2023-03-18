@@ -29,6 +29,7 @@ func (l *ListRepo) GetByID(ctx context.Context, id int32) (domain.List, error) {
 		return outputList, err
 	}
 	outputList.ID = list.ID
+	outputList.Key = list.Key
 	outputList.PageCount = uint16(list.PageCount)
 	if list.NextPageKey.Valid {
 		outputList.NextPageKey = &list.NextPageKey.String
@@ -63,6 +64,7 @@ func (l *ListRepo) GetAll(ctx context.Context) ([]domain.List, error) {
 	outputLists := make([]domain.List, len(lists))
 	for i := 0; i < len(lists); i++ {
 		outputLists[i].ID = lists[i].ID
+		outputLists[i].Key = lists[i].Key
 		if lists[i].NextPageKey.Valid {
 			outputLists[i].NextPageKey = &lists[i].NextPageKey.String
 		} else {
@@ -86,6 +88,17 @@ func (l *ListRepo) Store(ctx context.Context, list domain.List) error {
 }
 
 func (l *ListRepo) DeleteByID(ctx context.Context, id int32) error {
+	return nil
+}
+
+func (l *ListRepo) DeleteByKey(ctx context.Context, key string) error {
+	count, err := l.queries.DeleteListByKey(ctx, key)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return domain.ErrNotFound
+	}
 	return nil
 }
 

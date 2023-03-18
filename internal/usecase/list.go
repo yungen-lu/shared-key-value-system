@@ -84,3 +84,15 @@ func (uc *ListUseCase) UpdatePageByKey(ctx context.Context, key string, page dom
 	defer cancel()
 	return uc.p.UpdateByKey(c, key, page)
 }
+
+func (uc *ListUseCase) DeleteHeadByKey(ctx context.Context, key string) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.l.DeleteByKey(c, key)
+}
+
+func (uc *ListUseCase) DeletePageByKey(ctx context.Context, key string) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.p.DeleteByKey(c, key)
+}

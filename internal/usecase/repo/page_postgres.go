@@ -28,6 +28,7 @@ func (p *PageRepo) GetByID(ctx context.Context, id int32) (domain.Page, error) {
 		return outputPage, err
 	}
 	outputPage.ID = page.ID
+	outputPage.Key = page.Key
 	// outputPage.Articles = page.Articles
 	if page.NextPageKey.Valid {
 		outputPage.NextPageKey = &page.NextPageKey.String
@@ -61,6 +62,7 @@ func (p *PageRepo) GetAll(ctx context.Context) ([]domain.Page, error) {
 	outputPages := make([]domain.Page, len(pages))
 	for i := 0; i < len(pages); i++ {
 		outputPages[i].ID = pages[i].ID
+		outputPages[i].Key = pages[i].Key
 		// outputPages[i].Articles = pages[i].Articles
 		if pages[i].NextPageKey.Valid {
 			outputPages[i].NextPageKey = &pages[i].NextPageKey.String
@@ -84,6 +86,17 @@ func (p *PageRepo) Store(ctx context.Context, page domain.Page) error {
 }
 
 func (p *PageRepo) DeleteByID(ctx context.Context, id int32) error {
+	return nil
+}
+
+func (p *PageRepo) DeleteByKey(ctx context.Context, key string) error {
+	count, err := p.queries.DeletePageByKey(ctx, key)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return domain.ErrNotFound
+	}
 	return nil
 }
 

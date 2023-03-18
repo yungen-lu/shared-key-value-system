@@ -24,6 +24,7 @@ func NewPageRoutes(handler *gin.RouterGroup, listUseCase usecase.List) {
 		h.GET("/:key", r.getByKey)
 		h.POST("", r.create)
 		h.PUT("/:key", r.update)
+		h.DELETE("/:key", r.delete)
 	}
 }
 
@@ -38,7 +39,7 @@ func (r *pageRoutes) getAll(c *gin.Context) {
 	pages, err := r.list.GetPages(c)
 	if err != nil {
 		log.Error("http - v1 - page - getAll - GetPages", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, pages)
@@ -61,7 +62,8 @@ func (r *pageRoutes) getByKey(c *gin.Context) {
 	page, err := r.list.GetPageByKey(c, key)
 	if err != nil {
 		log.Error("http - v1 - page - getByKey - GetPageByKey", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, page)
@@ -89,7 +91,7 @@ func (r *pageRoutes) getByID(c *gin.Context) {
 	page, err := r.list.GetPageByID(c, int32(id))
 	if err != nil {
 		log.Error("http - v1 - page - getByID - GetPageByID", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, page)
@@ -118,7 +120,8 @@ func (r *pageRoutes) create(c *gin.Context) {
 	err := r.list.CreatePage(c, domain.Page{Key: req.Key, NextPageKey: req.NextPageKey})
 	if err != nil {
 		log.Error("http - v1 - page - create - CreatePage", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})
@@ -151,7 +154,28 @@ func (r *pageRoutes) update(c *gin.Context) {
 	err := r.list.UpdatePageByKey(c, key, domain.Page{NextPageKey: req.NextPageKey})
 	if err != nil {
 		log.Error("http - v1 - page - update - UpdatePageByKey", "err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{})
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+// @Summary		Delete a page
+// @Description	test
+// @Success 200
+// @Failure 500 {object}
+func (r *pageRoutes) delete(c *gin.Context) {
+	key, ok := c.Params.Get("key")
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{})
+		return
+	}
+	err := r.list.DeletePageByKey(c, key)
+	if err != nil {
+		log.Error("http - v1 - page - delete - DeletePageByKey", "err", err)
+		// c.JSON(http.StatusInternalServerError, gin.H{})
+		responseError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})

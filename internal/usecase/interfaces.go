@@ -18,4 +18,6 @@ type List interface {
 	CreatePage(ctx context.Context, page domain.Page) error
 	UpdateHeadByKey(ctx context.Context, key string, list domain.List) error
 	UpdatePageByKey(ctx context.Context, key string, page domain.Page) error
+	DeleteHeadByKey(ctx context.Context, key string) error
+	DeletePageByKey(ctx context.Context, key string) error
 }
