@@ -148,7 +148,6 @@ func TestHead(t *testing.T) {
 			res: domain.List{
 				ID:          1,
 				Key:         "test-head",
-				PageCount:   0,
 				NextPageKey: nil,
 			},
 		},
@@ -173,13 +172,11 @@ func TestHead(t *testing.T) {
 				{
 					ID:          1,
 					Key:         "test-head",
-					PageCount:   0,
 					NextPageKey: nil,
 				},
 				{
 					ID:          2,
 					Key:         "test-head2",
-					PageCount:   0,
 					NextPageKey: nil,
 				},
 			},
@@ -208,14 +205,15 @@ func TestPage(t *testing.T) {
 
 	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
 	v1.NewRouter(router, list)
-	tmp := "test-page"
+	tmp := "test-page2"
 	tests := []test{
 		{
 			name:   "add page",
 			param:  "",
 			method: "POST",
 			payload: v1.CreatePageRequest{
-				Key: "test-page",
+				Key:     "test-page",
+				ListKey: "test-head",
 			},
 			code: http.StatusOK,
 			res:  nil,
@@ -231,6 +229,7 @@ func TestPage(t *testing.T) {
 				Key:         "test-page",
 				Articles:    nil,
 				NextPageKey: nil,
+				ListKey:     "test-head",
 			},
 		},
 		{
@@ -238,8 +237,8 @@ func TestPage(t *testing.T) {
 			param:  "",
 			method: "POST",
 			payload: v1.CreatePageRequest{
-				Key:         "test-page2",
-				NextPageKey: &tmp,
+				Key:     "test-page2",
+				ListKey: "test-head",
 			},
 			code: http.StatusOK,
 			res:  nil,
@@ -255,13 +254,15 @@ func TestPage(t *testing.T) {
 					ID:          1,
 					Key:         "test-page",
 					Articles:    nil,
-					NextPageKey: nil,
+					NextPageKey: &tmp,
+					ListKey:     "test-head",
 				},
 				{
 					ID:          2,
 					Key:         "test-page2",
 					Articles:    nil,
-					NextPageKey: &tmp,
+					NextPageKey: nil,
+					ListKey:     "test-head",
 				},
 			},
 		},
