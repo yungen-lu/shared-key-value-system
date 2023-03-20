@@ -20,4 +20,5 @@ type List interface {
 	UpdatePageByKey(ctx context.Context, key string, page domain.Page) error
 	DeleteHeadByKey(ctx context.Context, key string) error
 	DeletePageByKey(ctx context.Context, key string) error
+	DeleteOutdatedLists(ctx context.Context) (int64, error)
 }

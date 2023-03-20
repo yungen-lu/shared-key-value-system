@@ -19,4 +19,5 @@ type ListRepo interface {
 	// Update(ctx context.Context, list List) error
 	DeleteByID(ctx context.Context, id int32) error
 	DeleteByKey(ctx context.Context, key string) error
+	DeleteOutdated(ctx context.Context) (int64, error)
 }

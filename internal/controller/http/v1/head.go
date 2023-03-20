@@ -25,6 +25,7 @@ func NewHeadRoutes(handler *gin.RouterGroup, listUseCase usecase.List) {
 		h.POST("", r.create)
 		h.PUT("/:key", r.update)
 		h.DELETE("/:key", r.delete)
+		h.DELETE("", r.outdated)
 	}
 }
 
@@ -183,4 +184,21 @@ func (r *headRoutes) delete(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})
+}
+
+type OutdatedHeadResponse struct {
+	Count int64 `json:"count"`
+}
+
+// @Summary Delete outdated
+// @Success 200 int
+// @Failure 500 {object}
+func (r *headRoutes) outdated(c *gin.Context) {
+	count, err := r.list.DeleteOutdatedLists(c)
+	if err != nil {
+		log.Error("http - v1 - head - outdated - DeleteOutdated", "err", err)
+		responseError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, OutdatedHeadResponse{Count: count})
 }

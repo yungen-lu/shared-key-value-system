@@ -77,6 +77,21 @@ func (mr *MockListMockRecorder) DeleteHeadByKey(ctx, key interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteHeadByKey", reflect.TypeOf((*MockList)(nil).DeleteHeadByKey), ctx, key)
 }
 
+// DeleteOutdatedLists mocks base method.
+func (m *MockList) DeleteOutdatedLists(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteOutdatedLists", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteOutdatedLists indicates an expected call of DeleteOutdatedLists.
+func (mr *MockListMockRecorder) DeleteOutdatedLists(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOutdatedLists", reflect.TypeOf((*MockList)(nil).DeleteOutdatedLists), ctx)
+}
+
 // DeletePageByKey mocks base method.
 func (m *MockList) DeletePageByKey(ctx context.Context, key string) error {
 	m.ctrl.T.Helper()

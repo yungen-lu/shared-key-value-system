@@ -135,3 +135,7 @@ func (l *ListRepo) UpdateByKey(ctx context.Context, key string, list domain.List
 	_, err := l.queries.UpdateListByKey(ctx, param)
 	return err
 }
+
+func (l *ListRepo) DeleteOutdated(ctx context.Context) (int64, error) {
+	return l.queries.DeleteOutdatedLists(ctx)
+}

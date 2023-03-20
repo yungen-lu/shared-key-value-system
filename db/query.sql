@@ -69,6 +69,10 @@ INSERT INTO lists (key, next_page_key, latest_page_key) VALUES ($1, $2, $3) RETU
 DELETE FROM lists
 WHERE key = $1;
 
+-- name: DeleteOutdatedLists :execrows
+DELETE FROM lists
+WHERE created_at < NOW() - INTERVAL '1 day';
+
 -- name: GetArticleByID :one
 SELECT * FROM articles
 WHERE id = $1 LIMIT 1;

@@ -63,6 +63,21 @@ func (mr *MockListRepoMockRecorder) DeleteByKey(ctx, key interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByKey", reflect.TypeOf((*MockListRepo)(nil).DeleteByKey), ctx, key)
 }
 
+// DeleteOutdated mocks base method.
+func (m *MockListRepo) DeleteOutdated(ctx context.Context) (int64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteOutdated", ctx)
+	ret0, _ := ret[0].(int64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteOutdated indicates an expected call of DeleteOutdated.
+func (mr *MockListRepoMockRecorder) DeleteOutdated(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOutdated", reflect.TypeOf((*MockListRepo)(nil).DeleteOutdated), ctx)
+}
+
 // GetAll mocks base method.
 func (m *MockListRepo) GetAll(ctx context.Context) ([]domain.List, error) {
 	m.ctrl.T.Helper()

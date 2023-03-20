@@ -96,3 +96,9 @@ func (uc *ListUseCase) DeletePageByKey(ctx context.Context, key string) error {
 	defer cancel()
 	return uc.p.DeleteByKey(c, key)
 }
+
+func (uc *ListUseCase) DeleteOutdatedLists(ctx context.Context) (int64, error) {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+	return uc.l.DeleteOutdated(c)
+}

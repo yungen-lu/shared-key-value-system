@@ -73,6 +73,19 @@ func (q *Queries) DeleteListByKey(ctx context.Context, key string) (int64, error
 	return result.RowsAffected(), nil
 }
 
+const deleteOutdatedLists = `-- name: DeleteOutdatedLists :execrows
+DELETE FROM lists
+WHERE created_at < NOW() - INTERVAL '1 day'
+`
+
+func (q *Queries) DeleteOutdatedLists(ctx context.Context) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteOutdatedLists)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const deletePageByKey = `-- name: DeletePageByKey :execrows
 DELETE FROM pages
 WHERE key = $1
