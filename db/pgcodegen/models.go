@@ -19,12 +19,12 @@ type Article struct {
 }
 
 type List struct {
-	ID          int32
-	Key         string
-	PageCount   int32
-	NextPageKey pgtype.Text
-	CreatedAt   pgtype.Timestamptz
-	UpdatedAt   pgtype.Timestamptz
+	ID            int32
+	Key           string
+	NextPageKey   pgtype.Text
+	LatestPageKey pgtype.Text
+	CreatedAt     pgtype.Timestamptz
+	UpdatedAt     pgtype.Timestamptz
 }
 
 type Page struct {
@@ -33,6 +33,7 @@ type Page struct {
 	NextPageKey pgtype.Text
 	CreatedAt   pgtype.Timestamptz
 	UpdatedAt   pgtype.Timestamptz
+	ListKey     string
 }
 
 type Topic struct {

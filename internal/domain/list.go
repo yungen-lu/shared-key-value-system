@@ -3,10 +3,10 @@ package domain
 import "context"
 
 type List struct {
-	ID          int32
-	Key         string
-	PageCount   uint16
-	NextPageKey *string
+	ID            int32
+	Key           string
+	NextPageKey   *string
+	LatestPageKey *string
 }
 
 //go:generate mockgen -source=list.go -destination=mocks/mock_list.go -package=mocks

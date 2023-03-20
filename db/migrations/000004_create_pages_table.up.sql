@@ -2,9 +2,13 @@ CREATE TABLE IF NOT EXISTS pages (
   id SERIAL NOT NULL PRIMARY KEY,
   key VARCHAR (50) UNIQUE NOT NULL,
   next_page_key VARCHAR (50) REFERENCES pages(key),
+  -- list_key VARCHAR (50) NOT NULL REFERENCES lists(key) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ALTER TABLE lists ADD COLUMN next_page_key VARCHAR (50) REFERENCES pages(key),
+-- ADD COLUMN latest_page_key VARCHAR (50) REFERENCES pages(key);
 
 CREATE TRIGGER set_timestamp_pages
 BEFORE UPDATE ON pages

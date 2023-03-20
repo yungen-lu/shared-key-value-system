@@ -100,6 +100,7 @@ func (r *pageRoutes) getByID(c *gin.Context) {
 type CreatePageRequest struct {
 	Key         string  `json:"key" binding:"required"`
 	NextPageKey *string `json:"next_page_key"`
+	ListKey     string  `json:"list_key" binding:"required"`
 }
 
 // @Summary		Create a page
@@ -117,7 +118,7 @@ func (r *pageRoutes) create(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{})
 		return
 	}
-	err := r.list.CreatePage(c, domain.Page{Key: req.Key, NextPageKey: req.NextPageKey})
+	err := r.list.CreatePage(c, domain.Page{Key: req.Key, NextPageKey: req.NextPageKey, ListKey: req.ListKey})
 	if err != nil {
 		log.Error("http - v1 - page - create - CreatePage", "err", err)
 		// c.JSON(http.StatusInternalServerError, gin.H{})

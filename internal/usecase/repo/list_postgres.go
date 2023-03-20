@@ -30,11 +30,15 @@ func (l *ListRepo) GetByID(ctx context.Context, id int32) (domain.List, error) {
 	}
 	outputList.ID = list.ID
 	outputList.Key = list.Key
-	outputList.PageCount = uint16(list.PageCount)
 	if list.NextPageKey.Valid {
 		outputList.NextPageKey = &list.NextPageKey.String
 	} else {
 		outputList.NextPageKey = nil
+	}
+	if list.LatestPageKey.Valid {
+		outputList.LatestPageKey = &list.LatestPageKey.String
+	} else {
+		outputList.LatestPageKey = nil
 	}
 	return outputList, err
 }
@@ -47,11 +51,15 @@ func (l *ListRepo) GetByKey(ctx context.Context, key string) (domain.List, error
 	}
 	outputList.ID = list.ID
 	outputList.Key = list.Key
-	outputList.PageCount = uint16(list.PageCount)
 	if list.NextPageKey.Valid {
 		outputList.NextPageKey = &list.NextPageKey.String
 	} else {
 		outputList.NextPageKey = nil
+	}
+	if list.LatestPageKey.Valid {
+		outputList.LatestPageKey = &list.LatestPageKey.String
+	} else {
+		outputList.LatestPageKey = nil
 	}
 	return outputList, nil
 }
@@ -70,7 +78,11 @@ func (l *ListRepo) GetAll(ctx context.Context) ([]domain.List, error) {
 		} else {
 			outputLists[i].NextPageKey = nil
 		}
-		outputLists[i].PageCount = uint16(lists[i].PageCount)
+		if lists[i].LatestPageKey.Valid {
+			outputLists[i].LatestPageKey = &lists[i].LatestPageKey.String
+		} else {
+			outputLists[i].LatestPageKey = nil
+		}
 	}
 	return outputLists, err
 }
@@ -82,6 +94,11 @@ func (l *ListRepo) Store(ctx context.Context, list domain.List) error {
 		param.NextPageKey = pgtype.Text{String: *list.NextPageKey, Valid: true}
 	} else {
 		param.NextPageKey = pgtype.Text{Valid: false}
+	}
+	if list.LatestPageKey != nil {
+		param.LatestPageKey = pgtype.Text{String: *list.LatestPageKey, Valid: true}
+	} else {
+		param.LatestPageKey = pgtype.Text{Valid: false}
 	}
 	_, err := l.queries.CreateList(ctx, param)
 	return err
@@ -109,6 +126,11 @@ func (l *ListRepo) UpdateByKey(ctx context.Context, key string, list domain.List
 		param.NextPageKey = pgtype.Text{String: *list.NextPageKey, Valid: true}
 	} else {
 		param.NextPageKey = pgtype.Text{Valid: false}
+	}
+	if list.LatestPageKey != nil {
+		param.LatestPageKey = pgtype.Text{String: *list.LatestPageKey, Valid: true}
+	} else {
+		param.LatestPageKey = pgtype.Text{Valid: false}
 	}
 	_, err := l.queries.UpdateListByKey(ctx, param)
 	return err

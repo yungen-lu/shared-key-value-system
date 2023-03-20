@@ -30,6 +30,7 @@ func (p *PageRepo) GetByID(ctx context.Context, id int32) (domain.Page, error) {
 	outputPage.ID = page.ID
 	outputPage.Key = page.Key
 	// outputPage.Articles = page.Articles
+	outputPage.ListKey = page.ListKey
 	if page.NextPageKey.Valid {
 		outputPage.NextPageKey = &page.NextPageKey.String
 	} else {
@@ -46,6 +47,7 @@ func (p *PageRepo) GetByKey(ctx context.Context, key string) (domain.Page, error
 	}
 	outputPage.ID = page.ID
 	outputPage.Key = page.Key
+	outputPage.ListKey = page.ListKey
 	if page.NextPageKey.Valid {
 		outputPage.NextPageKey = &page.NextPageKey.String
 	} else {
@@ -64,6 +66,7 @@ func (p *PageRepo) GetAll(ctx context.Context) ([]domain.Page, error) {
 		outputPages[i].ID = pages[i].ID
 		outputPages[i].Key = pages[i].Key
 		// outputPages[i].Articles = pages[i].Articles
+		outputPages[i].ListKey = pages[i].ListKey
 		if pages[i].NextPageKey.Valid {
 			outputPages[i].NextPageKey = &pages[i].NextPageKey.String
 		} else {
@@ -76,6 +79,7 @@ func (p *PageRepo) GetAll(ctx context.Context) ([]domain.Page, error) {
 func (p *PageRepo) Store(ctx context.Context, page domain.Page) error {
 	var param pgcodegen.CreatePageParams
 	param.Key = page.Key
+	param.ListKey = page.ListKey
 	if page.NextPageKey != nil {
 		param.NextPageKey = pgtype.Text{String: *page.NextPageKey, Valid: true}
 	} else {

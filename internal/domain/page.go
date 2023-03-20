@@ -7,6 +7,7 @@ type Page struct {
 	Key         string
 	Articles    []Article
 	NextPageKey *string
+	ListKey     string
 }
 
 //go:generate mockgen -source=page.go -destination=mocks/mock_page.go -package=mocks

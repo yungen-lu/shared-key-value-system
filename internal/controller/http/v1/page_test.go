@@ -101,9 +101,9 @@ func TestCreatePage(t *testing.T) {
 		{
 			name: "success result",
 			mock: func() {
-				listUseCase.EXPECT().CreatePage(gomock.Any(), domain.Page{Key: "test-page"}).Return(nil)
+				listUseCase.EXPECT().CreatePage(gomock.Any(), domain.Page{Key: "test-page", ListKey: "test-list"}).Return(nil)
 			},
-			payload: v1.CreatePageRequest{Key: "test-page"},
+			payload: v1.CreatePageRequest{Key: "test-page", ListKey: "test-list"},
 			code:    http.StatusOK,
 			res:     nil,
 		},
