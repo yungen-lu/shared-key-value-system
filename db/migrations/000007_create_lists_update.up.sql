@@ -1,9 +1,14 @@
 CREATE OR REPLACE FUNCTION update_latest_page_on_insert()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE pages SET next_page_key = NEW.key WHERE list_key = NEW.list_key AND key = (SELECT latest_page_key FROM lists WHERE key = NEW.list_key);
-  UPDATE lists SET next_page_key = NEW.key WHERE key = NEW.list_key AND next_page_key IS NULL;
-  UPDATE lists SET latest_page_key = NEW.key WHERE key = NEW.list_key;
+  IF NEW.next_page_key IS NOT NULL AND EXISTS(SELECT 1 FROM pages WHERE key = NEW.next_page_key) THEN
+    UPDATE pages SET next_page_key = NEW.key WHERE next_page_key = NEW.next_page_key AND list_key = NEW.list_key AND key <> NEW.key;
+    UPDATE lists SET next_page_key = NEW.key WHERE key = NEW.list_key AND next_page_key = NEW.next_page_key;
+  ELSE
+    UPDATE pages SET next_page_key = NEW.key WHERE list_key = NEW.list_key AND key = (SELECT latest_page_key FROM lists WHERE key = NEW.list_key);
+    UPDATE lists SET latest_page_key = NEW.key WHERE key = NEW.list_key;
+    UPDATE lists SET next_page_key = NEW.key WHERE key = NEW.list_key AND next_page_key IS NULL;
+  END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
