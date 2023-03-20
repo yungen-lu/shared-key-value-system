@@ -7,6 +7,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "github.com/yungen-lu/shared-key-value-list-system/docs"
+	"github.com/yungen-lu/shared-key-value-list-system/internal/controller/http/middleware"
 	"github.com/yungen-lu/shared-key-value-list-system/internal/usecase"
 )
 
@@ -15,6 +16,7 @@ import (
 // @basePath	/v1
 func NewRouter(handler *gin.Engine, listUseCase usecase.List) {
 	handler.Use(gin.Recovery())
+	handler.Use(middleware.CustomLogger())
 	handler.GET("/healthz", func(ctx *gin.Context) {
 		ctx.Status(http.StatusOK)
 	})

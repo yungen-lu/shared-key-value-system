@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/gin-gonic/gin"
+	"github.com/yungen-lu/shared-key-value-list-system/config"
 	v1 "github.com/yungen-lu/shared-key-value-list-system/internal/controller/http/v1"
 	"github.com/yungen-lu/shared-key-value-list-system/internal/usecase"
 	"github.com/yungen-lu/shared-key-value-list-system/internal/usecase/repo"
@@ -16,9 +17,13 @@ import (
 )
 
 func main() {
-	pg, err := postgres.New("postgresql://postgres@localhost:5432")
+	cfg, err := config.NewConfig()
 	if err != nil {
-		panic(err)
+		log.Fatal("can't load config", "err", err)
+	}
+	pg, err := postgres.New(cfg.URL)
+	if err != nil {
+		log.Fatal("can't connect to postgres", "err", err)
 	}
 	defer pg.Close()
 
@@ -28,18 +33,18 @@ func main() {
 	}
 	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
 	v1.NewRouter(handler, list)
-	httpServer := httpserver.New(handler, httpserver.Port("80"))
+	httpServer := httpserver.New(handler, httpserver.Port(cfg.Port))
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
 	select {
 	case sig := <-interrupt:
-		_ = sig
+		log.Info("received signal", "signal", sig.String())
 	case err := <-httpServer.Notify():
-		_ = err
+		log.Error("http server error", "err", err)
 	}
 	err = httpServer.Shutdown()
 	if err != nil {
-
+		log.Error("err when shutting down http server", "err", err)
 	}
 }
