@@ -260,3 +260,99 @@ func TestUpdateHeadByKey(t *testing.T) {
 		})
 	}
 }
+
+func TestDeleteHeadByKey(t *testing.T) {
+	t.Parallel()
+
+	listUsecase, listRepo, _ := list(t)
+	tests := []test{
+		{
+			name: "error result",
+			mock: func() {
+				listRepo.EXPECT().DeleteByKey(gomock.Any(), gomock.Eq("key")).Return(domain.ErrInernalServerError)
+			},
+			err: domain.ErrInernalServerError,
+		},
+		{
+			name: "success result",
+			mock: func() {
+				listRepo.EXPECT().DeleteByKey(gomock.Any(), gomock.Eq("key")).Return(nil)
+			},
+			err: nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			tc.mock()
+			err := listUsecase.DeleteHeadByKey(context.Background(), "key")
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestDeletePageByKey(t *testing.T) {
+	t.Parallel()
+
+	listUsecase, _, pageRepo := list(t)
+	tests := []test{
+		{
+			name: "error result",
+			mock: func() {
+				pageRepo.EXPECT().DeleteByKey(gomock.Any(), gomock.Eq("key")).Return(domain.ErrInernalServerError)
+			},
+			err: domain.ErrInernalServerError,
+		},
+		{
+			name: "success result",
+			mock: func() {
+				pageRepo.EXPECT().DeleteByKey(gomock.Any(), gomock.Eq("key")).Return(nil)
+			},
+			err: nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			tc.mock()
+			err := listUsecase.DeletePageByKey(context.Background(), "key")
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}
+
+func TestOutdatedLists(t *testing.T) {
+	t.Parallel()
+
+	listUsecase, listRepo, _ := list(t)
+	tests := []test{
+		{
+			name: "error result",
+			mock: func() {
+				listRepo.EXPECT().DeleteOutdated(gomock.Any()).Return(int64(0), domain.ErrInernalServerError)
+			},
+			res: int64(0),
+			err: domain.ErrInernalServerError,
+		},
+		{
+			name: "success result",
+			mock: func() {
+				listRepo.EXPECT().DeleteOutdated(gomock.Any()).Return(int64(1), nil)
+			},
+			res: int64(1),
+			err: nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			tc.mock()
+			count, err := listUsecase.DeleteOutdatedLists(context.Background())
+			assert.Equal(t, tc.res, count)
+			assert.ErrorIs(t, tc.err, err)
+		})
+	}
+}

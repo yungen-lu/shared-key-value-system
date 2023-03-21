@@ -17,3 +17,15 @@ generate:
 
 sqlc:
 	sqlc generate --experimental
+
+test.usecase:
+	go test -v ./internal/usecase/...
+
+test.http:
+	go test -v ./internal/controller/http/...
+
+test.integration:
+	go test -v ./integration-test/integration_test.go
+
+test:
+	go test -v ./...

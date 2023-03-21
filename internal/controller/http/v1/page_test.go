@@ -174,3 +174,47 @@ func TestUpdatePageByKey(t *testing.T) {
 		})
 	}
 }
+
+func TestDeletePage(t *testing.T) {
+	listUseCase := list(t)
+	router := gin.Default()
+	v1.NewPageRoutes(router.Group("/v1"), listUseCase)
+
+	tests := []test{
+		{
+			name:  "success result",
+			param: "/test-page",
+			mock: func() {
+				listUseCase.EXPECT().DeletePageByKey(gomock.Any(), gomock.Eq("test-page")).Return(nil)
+			},
+			payload: nil,
+			// payload: v1.CreatePageRequest{Key: "test-page", ListKey: "test-list"},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:  "failed result",
+			param: "/test-page",
+			mock: func() {
+				listUseCase.EXPECT().DeletePageByKey(gomock.Any(), gomock.Eq("test-page")).Return(domain.ErrInernalServerError)
+			},
+			payload: nil,
+			code:    http.StatusInternalServerError,
+			res:     nil,
+		},
+	}
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mock()
+			recorder := httptest.NewRecorder()
+			p, _ := json.Marshal(tc.payload)
+			router.ServeHTTP(recorder, httptest.NewRequest("DELETE", "/v1/page"+tc.param, bytes.NewBuffer(p)))
+			assert.Equal(t, tc.code, recorder.Code)
+			if tc.res != nil {
+				res, _ := json.Marshal(tc.res)
+				assert.Equal(t, string(res), recorder.Body.String())
+			}
+		})
+	}
+}

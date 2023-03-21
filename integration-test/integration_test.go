@@ -56,17 +56,23 @@ func startPostgres(host string, port string) (*postgres.Postgres, error) {
 }
 
 func migrateUp(host string, port string) error {
-	// p, err := filepath.Abs("./db/migrations")
-	// if err != nil {
-	// 	return err
-	// }
-	// log.Info("migrate path", "path", p)
 	m, err := migrate.New("file://../db/migrations", fmt.Sprintf("postgres://postgres:postgres@%s:%s?sslmode=disable", host, port))
 	if err != nil {
 		return err
 	}
 	defer m.Close()
 	if err = m.Up(); err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+	return nil
+}
+func migrateDown(host string, port string) error {
+	m, err := migrate.New("file://../db/migrations", fmt.Sprintf("postgres://postgres:postgres@%s:%s?sslmode=disable", host, port))
+	if err != nil {
+		return err
+	}
+	defer m.Close()
+	if err = m.Down(); err != nil && err != migrate.ErrNoChange {
 		return err
 	}
 	return nil
@@ -97,10 +103,10 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("can't get container host", "err", err)
 	}
-	err = migrateUp(containerHost, containerPort)
-	if err != nil {
-		log.Fatal("can't migrate up", "err", err)
-	}
+	// err = migrateUp(containerHost, containerPort)
+	// if err != nil {
+	// 	log.Fatal("can't migrate up", "err", err)
+	// }
 
 	code := m.Run()
 
@@ -112,7 +118,7 @@ func TestMain(m *testing.M) {
 
 type test struct {
 	name    string
-	param   string
+	url     string
 	method  string
 	payload interface{}
 	code    int
@@ -121,9 +127,13 @@ type test struct {
 
 func TestHead(t *testing.T) {
 	pg, err := startPostgres(containerHost, containerPort)
-	log.Info("postgres", "host", containerHost, "port", containerPort)
 	assert.NoError(t, err)
 	defer pg.Close()
+
+	err = migrateUp(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer migrateDown(containerHost, containerPort)
+
 	router := gin.Default()
 
 	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
@@ -131,7 +141,7 @@ func TestHead(t *testing.T) {
 	tests := []test{
 		{
 			name:   "add head",
-			param:  "",
+			url:    "/v1/head",
 			method: "POST",
 			payload: v1.CreateHeadRequest{
 				Key: "test-head",
@@ -141,7 +151,7 @@ func TestHead(t *testing.T) {
 		},
 		{
 			name:    "get head",
-			param:   "/test-head",
+			url:     "/v1/head/test-head",
 			method:  "GET",
 			payload: nil,
 			code:    http.StatusOK,
@@ -153,7 +163,7 @@ func TestHead(t *testing.T) {
 		},
 		{
 			name:   "add head 2",
-			param:  "",
+			url:    "/v1/head",
 			method: "POST",
 			payload: v1.CreateHeadRequest{
 				Key:         "test-head2",
@@ -164,7 +174,7 @@ func TestHead(t *testing.T) {
 		},
 		{
 			name:    "get heads",
-			param:   "",
+			url:     "/v1/head",
 			method:  "GET",
 			payload: nil,
 			code:    http.StatusOK,
@@ -186,7 +196,7 @@ func TestHead(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			p, _ := json.Marshal(tc.payload)
-			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, "/v1/head"+tc.param, bytes.NewBuffer(p)))
+			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, tc.url, bytes.NewBuffer(p)))
 			assert.Equal(t, tc.code, recorder.Code)
 			if tc.res != nil {
 				res, _ := json.Marshal(tc.res)
@@ -196,20 +206,33 @@ func TestHead(t *testing.T) {
 	}
 }
 
-func TestPage(t *testing.T) {
+func TestInsertPageAtTail(t *testing.T) {
 	pg, err := startPostgres(containerHost, containerPort)
-	log.Info("postgres", "host", containerHost, "port", containerPort)
 	assert.NoError(t, err)
 	defer pg.Close()
+
+	err = migrateUp(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer migrateDown(containerHost, containerPort)
+
 	router := gin.Default()
 
 	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
 	v1.NewRouter(router, list)
-	tmp := "test-page2"
 	tests := []test{
 		{
+			name:   "add head",
+			url:    "/v1/head",
+			method: "POST",
+			payload: v1.CreateHeadRequest{
+				Key: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
 			name:   "add page",
-			param:  "",
+			url:    "/v1/page",
 			method: "POST",
 			payload: v1.CreatePageRequest{
 				Key:     "test-page",
@@ -220,7 +243,7 @@ func TestPage(t *testing.T) {
 		},
 		{
 			name:    "get page",
-			param:   "/test-page",
+			url:     "/v1/page/test-page",
 			method:  "GET",
 			payload: nil,
 			code:    http.StatusOK,
@@ -234,7 +257,7 @@ func TestPage(t *testing.T) {
 		},
 		{
 			name:   "add page 2",
-			param:  "",
+			url:    "/v1/page",
 			method: "POST",
 			payload: v1.CreatePageRequest{
 				Key:     "test-page2",
@@ -245,7 +268,7 @@ func TestPage(t *testing.T) {
 		},
 		{
 			name:    "get pages",
-			param:   "",
+			url:     "/v1/page",
 			method:  "GET",
 			payload: nil,
 			code:    http.StatusOK,
@@ -254,7 +277,7 @@ func TestPage(t *testing.T) {
 					ID:          1,
 					Key:         "test-page",
 					Articles:    nil,
-					NextPageKey: &tmp,
+					NextPageKey: ptr("test-page2"),
 					ListKey:     "test-head",
 				},
 				{
@@ -266,12 +289,25 @@ func TestPage(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:    "get head",
+			url:     "/v1/head/test-head",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: domain.List{
+				ID:            1,
+				Key:           "test-head",
+				NextPageKey:   ptr("test-page"),
+				LatestPageKey: ptr("test-page2"),
+			},
+		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			p, _ := json.Marshal(tc.payload)
-			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, "/v1/page"+tc.param, bytes.NewBuffer(p)))
+			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, tc.url, bytes.NewBuffer(p)))
 			assert.Equal(t, tc.code, recorder.Code)
 			if tc.res != nil {
 				res, _ := json.Marshal(tc.res)
@@ -279,4 +315,546 @@ func TestPage(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInsertPageAtHead(t *testing.T) {
+	pg, err := startPostgres(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer pg.Close()
+
+	err = migrateUp(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer migrateDown(containerHost, containerPort)
+
+	router := gin.Default()
+
+	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
+	v1.NewRouter(router, list)
+	tests := []test{
+		{
+			name:   "add head",
+			url:    "/v1/head",
+			method: "POST",
+			payload: v1.CreateHeadRequest{
+				Key: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:    "get page",
+			url:     "/v1/page/test-page",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: domain.Page{
+				ID:          1,
+				Key:         "test-page",
+				Articles:    nil,
+				NextPageKey: nil,
+				ListKey:     "test-head",
+			},
+		},
+		{
+			name:   "add page 2",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:         "test-page2",
+				NextPageKey: ptr("test-page"),
+				ListKey:     "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:    "get pages",
+			url:     "/v1/page",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: []domain.Page{
+				{
+					ID:          1,
+					Key:         "test-page",
+					Articles:    nil,
+					NextPageKey: nil,
+					ListKey:     "test-head",
+				},
+				{
+					ID:          2,
+					Key:         "test-page2",
+					Articles:    nil,
+					NextPageKey: ptr("test-page"),
+					ListKey:     "test-head",
+				},
+			},
+		},
+		{
+			name:    "get head",
+			url:     "/v1/head/test-head",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: domain.List{
+				ID:            1,
+				Key:           "test-head",
+				NextPageKey:   ptr("test-page2"),
+				LatestPageKey: ptr("test-page"),
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			p, _ := json.Marshal(tc.payload)
+			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, tc.url, bytes.NewBuffer(p)))
+			assert.Equal(t, tc.code, recorder.Code)
+			if tc.res != nil {
+				res, _ := json.Marshal(tc.res)
+				assert.Equal(t, string(res), recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestInsertPageAtMid(t *testing.T) {
+	pg, err := startPostgres(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer pg.Close()
+
+	err = migrateUp(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer migrateDown(containerHost, containerPort)
+
+	router := gin.Default()
+
+	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
+	v1.NewRouter(router, list)
+	tests := []test{
+		{
+			name:   "add head",
+			url:    "/v1/head",
+			method: "POST",
+			payload: v1.CreateHeadRequest{
+				Key: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page 2",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page2",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page 3",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:         "test-page3",
+				NextPageKey: ptr("test-page2"),
+				ListKey:     "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:    "get pages",
+			url:     "/v1/page",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: []domain.Page{
+				{
+					ID:          1,
+					Key:         "test-page",
+					Articles:    nil,
+					NextPageKey: ptr("test-page3"),
+					ListKey:     "test-head",
+				},
+				{
+					ID:          2,
+					Key:         "test-page2",
+					Articles:    nil,
+					NextPageKey: nil,
+					ListKey:     "test-head",
+				},
+				{
+					ID:          3,
+					Key:         "test-page3",
+					Articles:    nil,
+					NextPageKey: ptr("test-page2"),
+					ListKey:     "test-head",
+				},
+			},
+		},
+		{
+			name:    "get head",
+			url:     "/v1/head/test-head",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: domain.List{
+				ID:            1,
+				Key:           "test-head",
+				NextPageKey:   ptr("test-page"),
+				LatestPageKey: ptr("test-page2"),
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			p, _ := json.Marshal(tc.payload)
+			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, tc.url, bytes.NewBuffer(p)))
+			assert.Equal(t, tc.code, recorder.Code)
+			if tc.res != nil {
+				res, _ := json.Marshal(tc.res)
+				assert.Equal(t, string(res), recorder.Body.String())
+			}
+		})
+	}
+}
+func TestDeletePageAtTail(t *testing.T) {
+	pg, err := startPostgres(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer pg.Close()
+
+	err = migrateUp(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer migrateDown(containerHost, containerPort)
+
+	router := gin.Default()
+
+	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
+	v1.NewRouter(router, list)
+	tests := []test{
+		{
+			name:   "add head",
+			url:    "/v1/head",
+			method: "POST",
+			payload: v1.CreateHeadRequest{
+				Key: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page 2",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page2",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:    "delete page at tail",
+			url:     "/v1/page/test-page2",
+			method:  "DELETE",
+			payload: nil,
+			code:    http.StatusOK,
+			res:     nil,
+		},
+		{
+			name:    "get pages",
+			url:     "/v1/page",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: []domain.Page{
+				{
+					ID:          1,
+					Key:         "test-page",
+					Articles:    nil,
+					NextPageKey: nil,
+					ListKey:     "test-head",
+				},
+			},
+		},
+		{
+			name:    "get head",
+			url:     "/v1/head/test-head",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: domain.List{
+				ID:            1,
+				Key:           "test-head",
+				NextPageKey:   ptr("test-page"),
+				LatestPageKey: ptr("test-page"),
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			p, _ := json.Marshal(tc.payload)
+			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, tc.url, bytes.NewBuffer(p)))
+			assert.Equal(t, tc.code, recorder.Code)
+			if tc.res != nil {
+				res, _ := json.Marshal(tc.res)
+				assert.Equal(t, string(res), recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestDeletePageAtHead(t *testing.T) {
+	pg, err := startPostgres(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer pg.Close()
+
+	err = migrateUp(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer migrateDown(containerHost, containerPort)
+
+	router := gin.Default()
+
+	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
+	v1.NewRouter(router, list)
+	tests := []test{
+		{
+			name:   "add head",
+			url:    "/v1/head",
+			method: "POST",
+			payload: v1.CreateHeadRequest{
+				Key: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page 2",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page2",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:    "delete page at head",
+			url:     "/v1/page/test-page",
+			method:  "DELETE",
+			payload: nil,
+			code:    http.StatusOK,
+			res:     nil,
+		},
+		{
+			name:    "get pages",
+			url:     "/v1/page",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: []domain.Page{
+				{
+					ID:          2,
+					Key:         "test-page2",
+					Articles:    nil,
+					NextPageKey: nil,
+					ListKey:     "test-head",
+				},
+			},
+		},
+		{
+			name:    "get head",
+			url:     "/v1/head/test-head",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: domain.List{
+				ID:            1,
+				Key:           "test-head",
+				NextPageKey:   ptr("test-page2"),
+				LatestPageKey: ptr("test-page2"),
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			p, _ := json.Marshal(tc.payload)
+			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, tc.url, bytes.NewBuffer(p)))
+			assert.Equal(t, tc.code, recorder.Code)
+			if tc.res != nil {
+				res, _ := json.Marshal(tc.res)
+				assert.Equal(t, string(res), recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestDeletePageAtMid(t *testing.T) {
+	pg, err := startPostgres(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer pg.Close()
+
+	err = migrateUp(containerHost, containerPort)
+	assert.NoError(t, err)
+	defer migrateDown(containerHost, containerPort)
+
+	router := gin.Default()
+
+	list := usecase.NewListUseCase(repo.NewListRepo(pg.Pool), repo.NewPageRepo(pg.Pool), 5*time.Second)
+	v1.NewRouter(router, list)
+	tests := []test{
+		{
+			name:   "add head",
+			url:    "/v1/head",
+			method: "POST",
+			payload: v1.CreateHeadRequest{
+				Key: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page 2",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page2",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:   "add page 3",
+			url:    "/v1/page",
+			method: "POST",
+			payload: v1.CreatePageRequest{
+				Key:     "test-page3",
+				ListKey: "test-head",
+			},
+			code: http.StatusOK,
+			res:  nil,
+		},
+		{
+			name:    "delete page at mid",
+			url:     "/v1/page/test-page2",
+			method:  "DELETE",
+			payload: nil,
+			code:    http.StatusOK,
+			res:     nil,
+		},
+		{
+			name:    "get pages",
+			url:     "/v1/page",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: []domain.Page{
+				{
+					ID:          1,
+					Key:         "test-page",
+					Articles:    nil,
+					NextPageKey: ptr("test-page3"),
+					ListKey:     "test-head",
+				},
+				{
+					ID:          3,
+					Key:         "test-page3",
+					Articles:    nil,
+					NextPageKey: nil,
+					ListKey:     "test-head",
+				},
+			},
+		},
+		{
+			name:    "get head",
+			url:     "/v1/head/test-head",
+			method:  "GET",
+			payload: nil,
+			code:    http.StatusOK,
+			res: domain.List{
+				ID:            1,
+				Key:           "test-head",
+				NextPageKey:   ptr("test-page"),
+				LatestPageKey: ptr("test-page3"),
+			},
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			p, _ := json.Marshal(tc.payload)
+			router.ServeHTTP(recorder, httptest.NewRequest(tc.method, tc.url, bytes.NewBuffer(p)))
+			assert.Equal(t, tc.code, recorder.Code)
+			if tc.res != nil {
+				res, _ := json.Marshal(tc.res)
+				assert.Equal(t, string(res), recorder.Body.String())
+			}
+		})
+	}
+}
+func ptr[T any](v T) *T {
+	return &v
 }
