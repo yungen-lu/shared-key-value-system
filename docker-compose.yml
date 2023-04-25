@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 20s
+      timeout: 60s
+      retries: 5
+      start_period: 30s
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+  shared-key-value-list-system:
+    container_name: key-value
+    image: yungen/shared-key-value-list-system:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      HTTP_PORT: 80
+      DB_URL: postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+  migrations:
+    image: migrate/migrate
+    command: -path=/migrations/ -database postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable up
+    volumes:
+      - ./db/migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+  

@@ -29,3 +29,6 @@ test.integration:
 
 test:
 	go test -v ./...
+
+docker.build-image:
+	docker build -t yungen/shared-key-value-list-system -f Dockerfile .
