@@ -1,5 +1,54 @@
 🔑📝 共用 Key-Value 列表系统
 
+# Pre-requisites
+
+* Go version >= 1.20
+
+* go-critic
+
+  ```shell
+  go install -v github.com/go-critic/go-critic/cmd/gocritic@latest
+  ```
+
+* gosec
+
+  ```shell
+  go install github.com/securego/gosec/v2/cmd/gosec@latest
+  ```
+
+* golangci-lint
+
+  * https://golangci-lint.run/usage/install/#local-installation
+
+* gomock
+
+  ```shell
+  go install github.com/golang/mock/mockgen@latest
+  ```
+
+* swag
+
+  ```shell
+  go install github.com/swaggo/swag/cmd/swag@latest
+  ```
+
+* migrate
+
+  ```shell
+  brew install golang-migrate
+  # https://github.com/golang-migrate/migrate/tree/master/cmd/migrate
+  ```
+
+* sqlc
+
+  ```shell
+  go install github.com/kyleconroy/sqlc/cmd/sqlc@latest
+  ```
+
+
+
+
+
 # API
 
 ## Create a list

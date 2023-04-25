@@ -32,3 +32,14 @@ test:
 
 docker.build-image:
 	docker build -t yungen/shared-key-value-list-system -f Dockerfile .
+
+critic:
+	gocritic check ./...
+
+critic.all:
+	gocritic check -enableAll ./...
+security:
+	gosec ./...
+
+lint:
+	golangci-lint run ./...
